@@ -68,12 +68,11 @@ T = typing.TypeVar("T")
 
 
 def _load_cert(filename, loader: typing.Callable[..., T], backend=None) -> T:
-    cert = load_vectors_from_file(
+    return load_vectors_from_file(
         filename=filename,
         loader=lambda pemfile: loader(pemfile.read(), backend),
         mode="rb",
     )
-    return cert
 
 
 class TestCertificateRevocationList:
@@ -118,7 +117,7 @@ class TestCertificateRevocationList:
         with pytest.raises(IndexError):
             crl[0]
         assert crl.get_revoked_certificate_by_serial_number(12) is None
-        assert list(iter(crl)) == []
+        assert not list(iter(crl))
 
     def test_invalid_pem(self, backend):
         with pytest.raises(ValueError):
@@ -578,7 +577,7 @@ class TestRevokedCertificate:
             else:
                 flags.discard(r.value.reason)
 
-        assert len(flags) == 0
+        assert not flags
 
     def test_no_revoked_certs(self, backend):
         crl = _load_cert(
@@ -1406,7 +1405,7 @@ class TestRSACertificateRequest:
         ]
         extensions = request.extensions
         assert isinstance(extensions, x509.Extensions)
-        assert list(extensions) == []
+        assert not list(extensions)
 
     def test_load_legacy_pem_header(self, backend):
         cert = _load_cert(

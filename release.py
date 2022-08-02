@@ -26,9 +26,10 @@ def wait_for_build_complete_github_actions(session, token, run_url):
             run_url,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "token {}".format(token),
+                "Authorization": f"token {token}",
             },
         )
+
         response.raise_for_status()
         if response.json()["conclusion"] is not None:
             break
@@ -40,18 +41,20 @@ def download_artifacts_github_actions(session, token, run_url):
         run_url,
         headers={
             "Content-Type": "application/json",
-            "Authorization": "token {}".format(token),
+            "Authorization": f"token {token}",
         },
     )
+
     response.raise_for_status()
 
     response = session.get(
         response.json()["artifacts_url"],
         headers={
             "Content-Type": "application/json",
-            "Authorization": "token {}".format(token),
+            "Authorization": f"token {token}",
         },
     )
+
     response.raise_for_status()
     paths = []
     for artifact in response.json()["artifacts"]:
@@ -59,9 +62,10 @@ def download_artifacts_github_actions(session, token, run_url):
             artifact["archive_download_url"],
             headers={
                 "Content-Type": "application/json",
-                "Authorization": "token {}".format(token),
+                "Authorization": f"token {token}",
             },
         )
+
         with zipfile.ZipFile(io.BytesIO(response.content)) as z:
             for name in z.namelist():
                 if not name.endswith(".whl"):
@@ -82,15 +86,14 @@ def fetch_github_actions_wheels(token, version):
     session = requests.Session()
 
     response = session.get(
-        (
-            "https://api.github.com/repos/pyca/cryptography/actions/workflows/"
-            "wheel-builder.yml/runs?event=push"
-        ),
+        "https://api.github.com/repos/pyca/cryptography/actions/workflows/"
+        "wheel-builder.yml/runs?event=push",
         headers={
             "Content-Type": "application/json",
-            "Authorization": "token {}".format(token),
+            "Authorization": f"token {token}",
         },
     )
+
     response.raise_for_status()
     run_url = response.json()["workflow_runs"][0]["url"]
     wait_for_build_complete_github_actions(session, token, run_url)

@@ -38,7 +38,7 @@ def build_vectors(mode, filename):
             output.append("KEY = {0}".format(key))
         elif line.startswith("IV"):
             name, iv = line.split(" = ")
-            iv = iv[0:16]
+            iv = iv[:16]
             output.append("IV = {0}".format(iv))
         elif line.startswith("PLAINTEXT"):
             name, plaintext = line.split(" = ")

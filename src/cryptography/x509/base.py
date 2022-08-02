@@ -70,12 +70,11 @@ def _convert_to_naive_utc_time(time: datetime.datetime) -> datetime.datetime:
     time -- datetime to normalize. Assumed to be in UTC if not timezone
             aware.
     """
-    if time.tzinfo is not None:
-        offset = time.utcoffset()
-        offset = offset if offset else datetime.timedelta()
-        return time.replace(tzinfo=None) - offset
-    else:
+    if time.tzinfo is None:
         return time
+    offset = time.utcoffset()
+    offset = offset or datetime.timedelta()
+    return time.replace(tzinfo=None) - offset
 
 
 class Attribute:
@@ -101,13 +100,14 @@ class Attribute:
         return "<Attribute(oid={}, value={!r})>".format(self.oid, self.value)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Attribute):
-            return NotImplemented
-
         return (
-            self.oid == other.oid
-            and self.value == other.value
-            and self._type == other._type
+            (
+                self.oid == other.oid
+                and self.value == other.value
+                and self._type == other._type
+            )
+            if isinstance(other, Attribute)
+            else NotImplemented
         )
 
     def __hash__(self) -> int:
@@ -124,14 +124,14 @@ class Attributes:
     __len__, __iter__, __getitem__ = _make_sequence_methods("_attributes")
 
     def __repr__(self) -> str:
-        return "<Attributes({})>".format(self._attributes)
+        return f"<Attributes({self._attributes})>"
 
     def get_attribute_for_oid(self, oid: ObjectIdentifier) -> Attribute:
         for attr in self:
             if attr.oid == oid:
                 return attr
 
-        raise AttributeNotFound("No {} attribute was found".format(oid), oid)
+        raise AttributeNotFound(f"No {oid} attribute was found", oid)
 
 
 class Version(utils.Enum):

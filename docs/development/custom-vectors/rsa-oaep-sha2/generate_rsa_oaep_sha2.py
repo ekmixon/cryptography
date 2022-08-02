@@ -26,30 +26,35 @@ def build_vectors(mgf1alg, hashalg, filename):
         skey = rsa.generate_private_key(65537, 2048)
         pn = skey.private_numbers()
         examples = private["examples"]
-        output.append("# =============================================")
-        output.append("# Example")
-        output.append("# Public key")
-        output.append("# Modulus:")
-        output.append(format(pn.public_numbers.n, "x"))
-        output.append("# Exponent:")
-        output.append(format(pn.public_numbers.e, "x"))
-        output.append("# Private key")
-        output.append("# Modulus:")
-        output.append(format(pn.public_numbers.n, "x"))
-        output.append("# Public exponent:")
-        output.append(format(pn.public_numbers.e, "x"))
-        output.append("# Exponent:")
-        output.append(format(pn.d, "x"))
-        output.append("# Prime 1:")
-        output.append(format(pn.p, "x"))
-        output.append("# Prime 2:")
-        output.append(format(pn.q, "x"))
-        output.append("# Prime exponent 1:")
-        output.append(format(pn.dmp1, "x"))
-        output.append("# Prime exponent 2:")
-        output.append(format(pn.dmq1, "x"))
-        output.append("# Coefficient:")
-        output.append(format(pn.iqmp, "x"))
+        output.extend(
+            (
+                "# =============================================",
+                "# Example",
+                "# Public key",
+                "# Modulus:",
+                format(pn.public_numbers.n, "x"),
+                "# Exponent:",
+                format(pn.public_numbers.e, "x"),
+                "# Private key",
+                "# Modulus:",
+                format(pn.public_numbers.n, "x"),
+                "# Public exponent:",
+                format(pn.public_numbers.e, "x"),
+                "# Exponent:",
+                format(pn.d, "x"),
+                "# Prime 1:",
+                format(pn.p, "x"),
+                "# Prime 2:",
+                format(pn.q, "x"),
+                "# Prime exponent 1:",
+                format(pn.dmp1, "x"),
+                "# Prime exponent 2:",
+                format(pn.dmq1, "x"),
+                "# Coefficient:",
+                format(pn.iqmp, "x"),
+            )
+        )
+
         pkey = skey.public_key()
         vectorkey = rsa.RSAPrivateNumbers(
             p=private["p"],
@@ -62,9 +67,7 @@ def build_vectors(mgf1alg, hashalg, filename):
                 e=private["public_exponent"], n=private["modulus"]
             ),
         ).private_key()
-        count = 1
-
-        for example in examples:
+        for count, example in enumerate(examples, start=1):
             message = vectorkey.decrypt(
                 binascii.unhexlify(example["encryption"]),
                 padding.OAEP(
@@ -87,11 +90,14 @@ def build_vectors(mgf1alg, hashalg, filename):
                     count, hashalg.name, mgf1alg.name
                 )
             )
-            count += 1
-            output.append("# Message:")
-            output.append(example["message"].decode("utf-8"))
-            output.append("# Encryption:")
-            output.append(binascii.hexlify(ct).decode("utf-8"))
+            output.extend(
+                (
+                    "# Message:",
+                    example["message"].decode("utf-8"),
+                    "# Encryption:",
+                    binascii.hexlify(ct).decode("utf-8"),
+                )
+            )
 
     return "\n".join(output)
 

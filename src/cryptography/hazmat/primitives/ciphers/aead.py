@@ -102,10 +102,10 @@ class AESCCM:
         if not isinstance(bit_length, int):
             raise TypeError("bit_length must be an integer")
 
-        if bit_length not in (128, 192, 256):
+        if bit_length in {128, 192, 256}:
+            return os.urandom(bit_length // 8)
+        else:
             raise ValueError("bit_length must be 128, 192, or 256")
-
-        return os.urandom(bit_length // 8)
 
     def encrypt(
         self,
@@ -164,20 +164,20 @@ class AESGCM:
 
     def __init__(self, key: bytes):
         utils._check_byteslike("key", key)
-        if len(key) not in (16, 24, 32):
+        if len(key) in {16, 24, 32}:
+            self._key = key
+        else:
             raise ValueError("AESGCM key must be 128, 192, or 256 bits.")
-
-        self._key = key
 
     @classmethod
     def generate_key(cls, bit_length: int) -> bytes:
         if not isinstance(bit_length, int):
             raise TypeError("bit_length must be an integer")
 
-        if bit_length not in (128, 192, 256):
+        if bit_length in {128, 192, 256}:
+            return os.urandom(bit_length // 8)
+        else:
             raise ValueError("bit_length must be 128, 192, or 256")
-
-        return os.urandom(bit_length // 8)
 
     def encrypt(
         self,
@@ -243,10 +243,10 @@ class AESOCB3:
         if not isinstance(bit_length, int):
             raise TypeError("bit_length must be an integer")
 
-        if bit_length not in (128, 192, 256):
+        if bit_length in {128, 192, 256}:
+            return os.urandom(bit_length // 8)
+        else:
             raise ValueError("bit_length must be 128, 192, or 256")
-
-        return os.urandom(bit_length // 8)
 
     def encrypt(
         self,

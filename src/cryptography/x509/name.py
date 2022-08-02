@@ -104,26 +104,23 @@ class NameAttribute:
                 )
             if not isinstance(value, bytes):
                 raise TypeError("value must be bytes for BitString")
-        else:
-            if not isinstance(value, str):
-                raise TypeError("value argument must be a str")
+        elif not isinstance(value, str):
+            raise TypeError("value argument must be a str")
 
-        if (
-            oid == NameOID.COUNTRY_NAME
-            or oid == NameOID.JURISDICTION_COUNTRY_NAME
-        ):
+        if oid in [NameOID.COUNTRY_NAME, NameOID.JURISDICTION_COUNTRY_NAME]:
             assert isinstance(value, str)
             c_len = len(value.encode("utf8"))
-            if c_len != 2 and _validate is True:
-                raise ValueError(
-                    "Country name must be a 2 character country code"
-                )
-            elif c_len != 2:
-                warnings.warn(
-                    "Country names should be two characters, but the "
-                    "attribute is {} characters in length.".format(c_len),
-                    stacklevel=2,
-                )
+            if c_len != 2:
+                if _validate:
+                    raise ValueError(
+                        "Country name must be a 2 character country code"
+                    )
+                else:
+                    warnings.warn(
+                        f"Country names should be two characters, but the attribute is {c_len} characters in length.",
+                        stacklevel=2,
+                    )
+
 
         # The appropriate ASN1 string type varies by OID and is defined across
         # multiple RFCs including 2459, 3280, and 5280. In general UTF8String
@@ -175,10 +172,11 @@ class NameAttribute:
         return f"{attr_name}={_escape_dn_value(self.value)}"
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, NameAttribute):
-            return NotImplemented
-
-        return self.oid == other.oid and self.value == other.value
+        return (
+            self.oid == other.oid and self.value == other.value
+            if isinstance(other, NameAttribute)
+            else NotImplemented
+        )
 
     def __hash__(self) -> int:
         return hash((self.oid, self.value))
@@ -222,10 +220,11 @@ class RelativeDistinguishedName:
         )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RelativeDistinguishedName):
-            return NotImplemented
-
-        return self._attribute_set == other._attribute_set
+        return (
+            self._attribute_set == other._attribute_set
+            if isinstance(other, RelativeDistinguishedName)
+            else NotImplemented
+        )
 
     def __hash__(self) -> int:
         return hash(self._attribute_set)
@@ -237,7 +236,7 @@ class RelativeDistinguishedName:
         return len(self._attributes)
 
     def __repr__(self) -> str:
-        return "<RelativeDistinguishedName({})>".format(self.rfc4514_string())
+        return f"<RelativeDistinguishedName({self.rfc4514_string()})>"
 
 
 class Name:
@@ -304,10 +303,11 @@ class Name:
         return rust_x509.encode_name_bytes(self)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Name):
-            return NotImplemented
-
-        return self._attributes == other._attributes
+        return (
+            self._attributes == other._attributes
+            if isinstance(other, Name)
+            else NotImplemented
+        )
 
     def __hash__(self) -> int:
         # TODO: this is relatively expensive, if this looks like a bottleneck
@@ -316,12 +316,11 @@ class Name:
 
     def __iter__(self) -> typing.Iterator[NameAttribute]:
         for rdn in self._attributes:
-            for ava in rdn:
-                yield ava
+            yield from rdn
 
     def __len__(self) -> int:
         return sum(len(rdn) for rdn in self._attributes)
 
     def __repr__(self) -> str:
         rdns = ",".join(attr.rfc4514_string() for attr in self._attributes)
-        return "<Name({})>".format(rdns)
+        return f"<Name({rdns})>"

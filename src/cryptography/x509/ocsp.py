@@ -488,7 +488,7 @@ class OCSPResponseBuilder:
         if self._certs is not None:
             raise ValueError("certificates may only be set once")
         certs = list(certs)
-        if len(certs) == 0:
+        if not certs:
             raise ValueError("certs must not be an empty list")
         if not all(isinstance(x, x509.Certificate) for x in certs):
             raise TypeError("certs must be a list of Certificates")

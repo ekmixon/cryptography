@@ -49,15 +49,14 @@ class ObjectIdentifier:
             )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, ObjectIdentifier):
-            return NotImplemented
-
-        return self.dotted_string == other.dotted_string
+        return (
+            self.dotted_string == other.dotted_string
+            if isinstance(other, ObjectIdentifier)
+            else NotImplemented
+        )
 
     def __repr__(self) -> str:
-        return "<ObjectIdentifier(oid={}, name={})>".format(
-            self.dotted_string, self._name
-        )
+        return f"<ObjectIdentifier(oid={self.dotted_string}, name={self._name})>"
 
     def __hash__(self) -> int:
         return hash(self.dotted_string)

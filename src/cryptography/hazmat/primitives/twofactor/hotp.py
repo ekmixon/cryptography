@@ -50,7 +50,7 @@ class HOTP:
         backend: typing.Any = None,
         enforce_key_length: bool = True,
     ) -> None:
-        if len(key) < 16 and enforce_key_length is True:
+        if len(key) < 16 and enforce_key_length:
             raise ValueError("Key length has to be at least 128 bits.")
 
         if not isinstance(length, int):
@@ -88,5 +88,5 @@ class HOTP:
         self, account_name: str, counter: int, issuer: typing.Optional[str]
     ) -> str:
         return _generate_uri(
-            self, "hotp", account_name, issuer, [("counter", int(counter))]
+            self, "hotp", account_name, issuer, [("counter", counter)]
         )

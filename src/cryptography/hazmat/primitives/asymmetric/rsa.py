@@ -362,17 +362,18 @@ class RSAPrivateNumbers:
         return ossl.load_rsa_private_numbers(self)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RSAPrivateNumbers):
-            return NotImplemented
-
         return (
-            self.p == other.p
-            and self.q == other.q
-            and self.d == other.d
-            and self.dmp1 == other.dmp1
-            and self.dmq1 == other.dmq1
-            and self.iqmp == other.iqmp
-            and self.public_numbers == other.public_numbers
+            (
+                self.p == other.p
+                and self.q == other.q
+                and self.d == other.d
+                and self.dmp1 == other.dmp1
+                and self.dmq1 == other.dmq1
+                and self.iqmp == other.iqmp
+                and self.public_numbers == other.public_numbers
+            )
+            if isinstance(other, RSAPrivateNumbers)
+            else NotImplemented
         )
 
     def __hash__(self) -> int:
@@ -416,10 +417,11 @@ class RSAPublicNumbers:
         return "<RSAPublicNumbers(e={0.e}, n={0.n})>".format(self)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RSAPublicNumbers):
-            return NotImplemented
-
-        return self.e == other.e and self.n == other.n
+        return (
+            self.e == other.e and self.n == other.n
+            if isinstance(other, RSAPublicNumbers)
+            else NotImplemented
+        )
 
     def __hash__(self) -> int:
         return hash((self.e, self.n))

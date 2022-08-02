@@ -107,11 +107,13 @@ class Cipher(typing.Generic[Mode]):
         ...
 
     def encryptor(self):
-        if isinstance(self.mode, modes.ModeWithAuthenticationTag):
-            if self.mode.tag is not None:
-                raise ValueError(
-                    "Authentication tag must be None when encrypting."
-                )
+        if (
+            isinstance(self.mode, modes.ModeWithAuthenticationTag)
+            and self.mode.tag is not None
+        ):
+            raise ValueError(
+                "Authentication tag must be None when encrypting."
+            )
         from cryptography.hazmat.backends.openssl.backend import backend
 
         ctx = backend.create_symmetric_encryption_ctx(
@@ -145,10 +147,7 @@ class Cipher(typing.Generic[Mode]):
         AEADEncryptionContext, AEADDecryptionContext, CipherContext
     ]:
         if isinstance(self.mode, modes.ModeWithAuthenticationTag):
-            if encrypt:
-                return _AEADEncryptionContext(ctx)
-            else:
-                return _AEADDecryptionContext(ctx)
+            return _AEADEncryptionContext(ctx) if encrypt else _AEADDecryptionContext(ctx)
         else:
             return _CipherContext(ctx)
 
@@ -206,9 +205,7 @@ class _AEADCipherContext(AEADCipherContext):
         self._bytes_processed += data_size
         if self._bytes_processed > self._ctx._mode._MAX_ENCRYPTED_BYTES:
             raise ValueError(
-                "{} has a maximum encrypted byte limit of {}".format(
-                    self._ctx._mode.name, self._ctx._mode._MAX_ENCRYPTED_BYTES
-                )
+                f"{self._ctx._mode.name} has a maximum encrypted byte limit of {self._ctx._mode._MAX_ENCRYPTED_BYTES}"
             )
 
     def update(self, data: bytes) -> bytes:
@@ -240,10 +237,9 @@ class _AEADCipherContext(AEADCipherContext):
         self._aad_bytes_processed += len(data)
         if self._aad_bytes_processed > self._ctx._mode._MAX_AAD_BYTES:
             raise ValueError(
-                "{} has a maximum AAD byte limit of {}".format(
-                    self._ctx._mode.name, self._ctx._mode._MAX_AAD_BYTES
-                )
+                f"{self._ctx._mode.name} has a maximum AAD byte limit of {self._ctx._mode._MAX_AAD_BYTES}"
             )
+
 
         self._ctx.authenticate_additional_data(data)
 

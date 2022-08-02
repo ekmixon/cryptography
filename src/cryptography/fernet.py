@@ -81,10 +81,7 @@ class Fernet:
 
     def decrypt(self, token: bytes, ttl: typing.Optional[int] = None) -> bytes:
         timestamp, data = Fernet._get_unverified_token_data(token)
-        if ttl is None:
-            time_info = None
-        else:
-            time_info = (ttl, int(time.time()))
+        time_info = None if ttl is None else (ttl, int(time.time()))
         return self._decrypt_data(data, timestamp, time_info)
 
     def decrypt_at_time(
@@ -166,12 +163,12 @@ class Fernet:
 
 class MultiFernet:
     def __init__(self, fernets: typing.Iterable[Fernet]):
-        fernets = list(fernets)
-        if not fernets:
+        if fernets := list(fernets):
+            self._fernets = fernets
+        else:
             raise ValueError(
                 "MultiFernet requires at least one Fernet instance"
             )
-        self._fernets = fernets
 
     def encrypt(self, msg: bytes) -> bytes:
         return self.encrypt_at_time(msg, int(time.time()))

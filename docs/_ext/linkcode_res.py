@@ -93,14 +93,9 @@ def linkcode_resolve(domain, info):
 
     fn = os.path.relpath(fn, start=os.path.dirname(cryptography.__file__))
 
-    if lineno:
-        linespec = "#L%d-L%d" % (lineno, lineno + len(source) - 1)
-    else:
-        linespec = ""
-
+    linespec = "#L%d-L%d" % (lineno, lineno + len(source) - 1) if lineno else ""
     url = "https://github.com/pyca/cryptography/blob/%s/src/cryptography/%s%s"
     if "dev" in cryptography.__version__:
         return url % ("main", fn, linespec)
-    else:
-        version = ".".join(cryptography.__version__.split(".")[:2] + ["x"])
-        return url % (version, fn, linespec)
+    version = ".".join(cryptography.__version__.split(".")[:2] + ["x"])
+    return url % (version, fn, linespec)

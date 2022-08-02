@@ -24,9 +24,10 @@ def _build_vectors():
         "IKM = " + binascii.hexlify(IKM).decode("ascii"),
         "salt = ",
         "info = ",
-        "L = {}".format(L),
+        f"L = {L}",
         "OKM = " + binascii.hexlify(OKM).decode("ascii"),
     ]
+
     return "\n".join(output)
 
 

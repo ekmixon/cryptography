@@ -34,18 +34,17 @@ class GeneralName(metaclass=abc.ABCMeta):
 
 class RFC822Name(GeneralName):
     def __init__(self, value: str) -> None:
-        if isinstance(value, str):
-            try:
-                value.encode("ascii")
-            except UnicodeEncodeError:
-                raise ValueError(
-                    "RFC822Name values should be passed as an A-label string. "
-                    "This means unicode characters should be encoded via "
-                    "a library like idna."
-                )
-        else:
+        if not isinstance(value, str):
             raise TypeError("value must be string")
 
+        try:
+            value.encode("ascii")
+        except UnicodeEncodeError:
+            raise ValueError(
+                "RFC822Name values should be passed as an A-label string. "
+                "This means unicode characters should be encoded via "
+                "a library like idna."
+            )
         name, address = parseaddr(value)
         if name or not address:
             # parseaddr has found a name (e.g. Name <email>) or the entire
@@ -68,10 +67,11 @@ class RFC822Name(GeneralName):
         return "<RFC822Name(value={0!r})>".format(self.value)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RFC822Name):
-            return NotImplemented
-
-        return self.value == other.value
+        return (
+            self.value == other.value
+            if isinstance(other, RFC822Name)
+            else NotImplemented
+        )
 
     def __hash__(self) -> int:
         return hash(self.value)
@@ -79,18 +79,17 @@ class RFC822Name(GeneralName):
 
 class DNSName(GeneralName):
     def __init__(self, value: str) -> None:
-        if isinstance(value, str):
-            try:
-                value.encode("ascii")
-            except UnicodeEncodeError:
-                raise ValueError(
-                    "DNSName values should be passed as an A-label string. "
-                    "This means unicode characters should be encoded via "
-                    "a library like idna."
-                )
-        else:
+        if not isinstance(value, str):
             raise TypeError("value must be string")
 
+        try:
+            value.encode("ascii")
+        except UnicodeEncodeError:
+            raise ValueError(
+                "DNSName values should be passed as an A-label string. "
+                "This means unicode characters should be encoded via "
+                "a library like idna."
+            )
         self._value = value
 
     @property
@@ -107,10 +106,11 @@ class DNSName(GeneralName):
         return "<DNSName(value={0!r})>".format(self.value)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, DNSName):
-            return NotImplemented
-
-        return self.value == other.value
+        return (
+            self.value == other.value
+            if isinstance(other, DNSName)
+            else NotImplemented
+        )
 
     def __hash__(self) -> int:
         return hash(self.value)
@@ -118,18 +118,17 @@ class DNSName(GeneralName):
 
 class UniformResourceIdentifier(GeneralName):
     def __init__(self, value: str) -> None:
-        if isinstance(value, str):
-            try:
-                value.encode("ascii")
-            except UnicodeEncodeError:
-                raise ValueError(
-                    "URI values should be passed as an A-label string. "
-                    "This means unicode characters should be encoded via "
-                    "a library like idna."
-                )
-        else:
+        if not isinstance(value, str):
             raise TypeError("value must be string")
 
+        try:
+            value.encode("ascii")
+        except UnicodeEncodeError:
+            raise ValueError(
+                "URI values should be passed as an A-label string. "
+                "This means unicode characters should be encoded via "
+                "a library like idna."
+            )
         self._value = value
 
     @property
@@ -148,10 +147,11 @@ class UniformResourceIdentifier(GeneralName):
         return "<UniformResourceIdentifier(value={0!r})>".format(self.value)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, UniformResourceIdentifier):
-            return NotImplemented
-
-        return self.value == other.value
+        return (
+            self.value == other.value
+            if isinstance(other, UniformResourceIdentifier)
+            else NotImplemented
+        )
 
     def __hash__(self) -> int:
         return hash(self.value)
@@ -169,13 +169,14 @@ class DirectoryName(GeneralName):
         return self._value
 
     def __repr__(self) -> str:
-        return "<DirectoryName(value={})>".format(self.value)
+        return f"<DirectoryName(value={self.value})>"
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, DirectoryName):
-            return NotImplemented
-
-        return self.value == other.value
+        return (
+            self.value == other.value
+            if isinstance(other, DirectoryName)
+            else NotImplemented
+        )
 
     def __hash__(self) -> int:
         return hash(self.value)
@@ -193,13 +194,14 @@ class RegisteredID(GeneralName):
         return self._value
 
     def __repr__(self) -> str:
-        return "<RegisteredID(value={})>".format(self.value)
+        return f"<RegisteredID(value={self.value})>"
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RegisteredID):
-            return NotImplemented
-
-        return self.value == other.value
+        return (
+            self.value == other.value
+            if isinstance(other, RegisteredID)
+            else NotImplemented
+        )
 
     def __hash__(self) -> int:
         return hash(self.value)
@@ -239,13 +241,14 @@ class IPAddress(GeneralName):
             )
 
     def __repr__(self) -> str:
-        return "<IPAddress(value={})>".format(self.value)
+        return f"<IPAddress(value={self.value})>"
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, IPAddress):
-            return NotImplemented
-
-        return self.value == other.value
+        return (
+            self.value == other.value
+            if isinstance(other, IPAddress)
+            else NotImplemented
+        )
 
     def __hash__(self) -> int:
         return hash(self.value)
@@ -275,10 +278,11 @@ class OtherName(GeneralName):
         )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, OtherName):
-            return NotImplemented
-
-        return self.type_id == other.type_id and self.value == other.value
+        return (
+            self.type_id == other.type_id and self.value == other.value
+            if isinstance(other, OtherName)
+            else NotImplemented
+        )
 
     def __hash__(self) -> int:
         return hash((self.type_id, self.value))

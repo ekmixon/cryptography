@@ -1925,16 +1925,14 @@ class TestOpenSSHSerialization:
             mode="rb",
         )
         pub_data = load_vectors_from_file(
-            os.path.join("asymmetric", "OpenSSH", key_file + ".pub"),
+            os.path.join("asymmetric", "OpenSSH", f"{key_file}.pub"),
             lambda f: f.read(),
             mode="rb",
         )
+
         nocomment_data = b" ".join(pub_data.split()[:2])
 
-        # load and compare
-        password = None
-        if "-psw" in key_file:
-            password = b"password"
+        password = b"password" if "-psw" in key_file else None
         private_key = load_ssh_private_key(priv_data, password, backend)
         assert (
             private_key.public_key().public_bytes(
@@ -2116,7 +2114,7 @@ class TestOpenSSHSerialization:
             pub.put_sshstr(elem)
 
         secret = ssh._FragList([checkval1, checkval2])
-        for i in range(nkeys):
+        for _ in range(nkeys):
             for elem in (priv_type,) + priv_fields + (comment,):
                 secret.put_sshstr(elem)
 
@@ -2130,7 +2128,7 @@ class TestOpenSSHSerialization:
         main.put_sshstr(kdfname)
         main.put_sshstr(kdfoptions)
         main.put_u32(nkeys)
-        for i in range(nkeys):
+        for _ in range(nkeys):
             main.put_sshstr(pub)
         main.put_sshstr(secret)
 

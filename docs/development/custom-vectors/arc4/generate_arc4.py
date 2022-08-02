@@ -47,10 +47,7 @@ _SIZES_TO_GENERATE = [160]
 
 def _key_for_size(size, keyinfo):
     msb, key = keyinfo
-    if msb:
-        return key[: size // 4]
-    else:
-        return key[-size // 4 :]
+    return key[: size // 4] if msb else key[-size // 4 :]
 
 
 def _build_vectors():
@@ -69,26 +66,21 @@ def _build_vectors():
             current_offset = 0
             for offset in _RFC6229_OFFSETS:
                 if offset % 16 != 0:
-                    raise ValueError(
-                        "Offset {} is not evenly divisible by 16".format(
-                            offset
-                        )
-                    )
+                    raise ValueError(f"Offset {offset} is not evenly divisible by 16")
                 while current_offset < offset:
                     encryptor.update(plaintext)
                     current_offset += len(plaintext)
-                output.append("\nCOUNT = {}".format(count))
+                output.append(f"\nCOUNT = {count}")
                 count += 1
-                output.append("KEY = {}".format(key))
-                output.append("OFFSET = {}".format(offset))
-                output.append(
-                    "PLAINTEXT = {}".format(binascii.hexlify(plaintext))
-                )
-                output.append(
-                    "CIPHERTEXT = {}".format(
-                        binascii.hexlify(encryptor.update(plaintext))
+                output.extend(
+                    (
+                        f"KEY = {key}",
+                        f"OFFSET = {offset}",
+                        f"PLAINTEXT = {binascii.hexlify(plaintext)}",
+                        f"CIPHERTEXT = {binascii.hexlify(encryptor.update(plaintext))}",
                     )
                 )
+
                 current_offset += len(plaintext)
             assert not encryptor.finalize()
     return "\n".join(output)

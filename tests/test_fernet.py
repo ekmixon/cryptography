@@ -28,7 +28,7 @@ def json_parametrize(keys, filename):
     with vector_file:
         data = json.load(vector_file)
         return pytest.mark.parametrize(
-            keys, [tuple([entry[k] for k in keys]) for entry in data]
+            keys, [tuple(entry[k] for k in keys) for entry in data]
         )
 
 

@@ -80,9 +80,10 @@ def _enc_dec_rsa(
 
     else:
         raise UnsupportedAlgorithm(
-            "{} is not supported by this backend.".format(padding.name),
+            f"{padding.name} is not supported by this backend.",
             _Reasons.UNSUPPORTED_PADDING,
         )
+
 
     return _enc_dec_rsa_pkey_ctx(backend, key, data, padding_enum, padding)
 
@@ -182,7 +183,7 @@ def _rsa_sig_determine_padding(
 
         # Size of key in bytes - 2 is the maximum
         # PSS signature length (salt length is checked later)
-        if pkey_size - algorithm.digest_size - 2 < 0:
+        if pkey_size - algorithm.digest_size < 2:
             raise ValueError(
                 "Digest too large for key size. Use a larger "
                 "key or different digest."
@@ -191,9 +192,10 @@ def _rsa_sig_determine_padding(
         padding_enum = backend._lib.RSA_PKCS1_PSS_PADDING
     else:
         raise UnsupportedAlgorithm(
-            "{} is not supported by this backend.".format(padding.name),
+            f"{padding.name} is not supported by this backend.",
             _Reasons.UNSUPPORTED_PADDING,
         )
+
 
     return padding_enum
 
@@ -224,20 +226,18 @@ def _rsa_sig_setup(
         if res <= 0:
             backend._consume_errors()
             raise UnsupportedAlgorithm(
-                "{} is not supported by this backend for RSA signing.".format(
-                    algorithm.name
-                ),
+                f"{algorithm.name} is not supported by this backend for RSA signing.",
                 _Reasons.UNSUPPORTED_HASH,
             )
+
     res = backend._lib.EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, padding_enum)
     if res <= 0:
         backend._consume_errors()
         raise UnsupportedAlgorithm(
-            "{} is not supported for the RSA signature operation.".format(
-                padding.name
-            ),
+            f"{padding.name} is not supported for the RSA signature operation.",
             _Reasons.UNSUPPORTED_PADDING,
         )
+
     if isinstance(padding, PSS):
         assert isinstance(algorithm, hashes.HashAlgorithm)
         res = backend._lib.EVP_PKEY_CTX_set_rsa_pss_saltlen(

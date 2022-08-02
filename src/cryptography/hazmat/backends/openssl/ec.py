@@ -56,8 +56,7 @@ def _ec_key_curve_sn(backend: "Backend", ec_key) -> str:
     curve_name = backend._lib.OBJ_nid2sn(nid)
     backend.openssl_assert(curve_name != backend._ffi.NULL)
 
-    sn = backend._ffi.string(curve_name).decode("ascii")
-    return sn
+    return backend._ffi.string(curve_name).decode("ascii")
 
 
 def _mark_asn1_named_ec_curve(backend: "Backend", ec_cdata):
@@ -77,7 +76,7 @@ def _sn_to_elliptic_curve(backend: "Backend", sn: str) -> ec.EllipticCurve:
         return ec._CURVE_TYPES[sn]()
     except KeyError:
         raise UnsupportedAlgorithm(
-            "{} is not a supported elliptic curve".format(sn),
+            f"{sn} is not a supported elliptic curve",
             _Reasons.UNSUPPORTED_ELLIPTIC_CURVE,
         )
 
@@ -269,24 +268,23 @@ class _EllipticCurvePublicKey(ec.EllipticCurvePublicKey):
         format: serialization.PublicFormat,
     ) -> bytes:
         if (
-            encoding is serialization.Encoding.X962
-            or format is serialization.PublicFormat.CompressedPoint
-            or format is serialization.PublicFormat.UncompressedPoint
+            encoding is not serialization.Encoding.X962
+            and format is not serialization.PublicFormat.CompressedPoint
+            and format is not serialization.PublicFormat.UncompressedPoint
         ):
-            if encoding is not serialization.Encoding.X962 or format not in (
-                serialization.PublicFormat.CompressedPoint,
-                serialization.PublicFormat.UncompressedPoint,
-            ):
-                raise ValueError(
-                    "X962 encoding must be used with CompressedPoint or "
-                    "UncompressedPoint format"
-                )
-
-            return self._encode_point(format)
-        else:
             return self._backend._public_key_bytes(
                 encoding, format, self, self._evp_pkey, None
             )
+        if encoding is not serialization.Encoding.X962 or format not in (
+            serialization.PublicFormat.CompressedPoint,
+            serialization.PublicFormat.UncompressedPoint,
+        ):
+            raise ValueError(
+                "X962 encoding must be used with CompressedPoint or "
+                "UncompressedPoint format"
+            )
+
+        return self._encode_point(format)
 
     def verify(
         self,

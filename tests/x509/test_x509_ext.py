@@ -1486,7 +1486,7 @@ class TestExtensions:
         )
         ext = cert.extensions
         assert len(ext) == 0
-        assert list(ext) == []
+        assert not list(ext)
         with pytest.raises(x509.ExtensionNotFound) as exc:
             ext.get_extension_for_oid(ExtensionOID.BASIC_CONSTRAINTS)
 
@@ -1908,7 +1908,7 @@ class TestDNSName:
         n2 = x509.DNSName("test2")
         n3 = x509.DNSName("test2")
         assert n1 != n2
-        assert not (n2 != n3)
+        assert n2 == n3
 
     def test_hash(self):
         n1 = x509.DNSName("test1")
@@ -5114,7 +5114,7 @@ class TestOCSPNoCheckExtension:
         onc2 = x509.OCSPNoCheck()
 
         assert onc1 == onc2
-        assert (onc1 != onc2) is False
+        assert onc1 == onc2
         assert onc1 != object()
 
     def test_repr(self):
@@ -5749,7 +5749,7 @@ class TestPrecertPoisonExtension:
         pcp2 = x509.PrecertPoison()
 
         assert pcp1 == pcp2
-        assert (pcp1 != pcp2) is False
+        assert pcp1 == pcp2
         assert pcp1 != object()
 
     def test_repr(self):

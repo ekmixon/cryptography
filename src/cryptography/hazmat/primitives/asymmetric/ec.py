@@ -169,7 +169,7 @@ class EllipticCurvePublicKey(metaclass=abc.ABCMeta):
         if not isinstance(curve, EllipticCurve):
             raise TypeError("curve must be an EllipticCurve instance")
 
-        if len(data) == 0:
+        if not data:
             raise ValueError("data must not be an empty byte string")
 
         if data[0] not in [0x02, 0x03, 0x04]:
@@ -420,14 +420,15 @@ class EllipticCurvePublicNumbers:
         return self._y
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, EllipticCurvePublicNumbers):
-            return NotImplemented
-
         return (
-            self.x == other.x
-            and self.y == other.y
-            and self.curve.name == other.curve.name
-            and self.curve.key_size == other.curve.key_size
+            (
+                self.x == other.x
+                and self.y == other.y
+                and self.curve.name == other.curve.name
+                and self.curve.key_size == other.curve.key_size
+            )
+            if isinstance(other, EllipticCurvePublicNumbers)
+            else NotImplemented
         )
 
     def __hash__(self) -> int:
@@ -474,12 +475,13 @@ class EllipticCurvePrivateNumbers:
         return self._public_numbers
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, EllipticCurvePrivateNumbers):
-            return NotImplemented
-
         return (
-            self.private_value == other.private_value
-            and self.public_numbers == other.public_numbers
+            (
+                self.private_value == other.private_value
+                and self.public_numbers == other.public_numbers
+            )
+            if isinstance(other, EllipticCurvePrivateNumbers)
+            else NotImplemented
         )
 
     def __hash__(self) -> int:

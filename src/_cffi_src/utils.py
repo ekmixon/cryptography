@@ -68,9 +68,10 @@ def build_ffi(
     ffi = FFI()
     # Always add the CRYPTOGRAPHY_PACKAGE_VERSION to the shared object
     cdef_source += "\nstatic const char *const CRYPTOGRAPHY_PACKAGE_VERSION;"
-    verify_source += '\n#define CRYPTOGRAPHY_PACKAGE_VERSION "{}"'.format(
-        about["__version__"]
+    verify_source += (
+        f'\n#define CRYPTOGRAPHY_PACKAGE_VERSION "{about["__version__"]}"'
     )
+
     ffi.cdef(cdef_source)
     ffi.set_source(
         module_name,

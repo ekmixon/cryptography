@@ -45,7 +45,7 @@ class KeySerializationEncryption(metaclass=abc.ABCMeta):
 
 class BestAvailableEncryption(KeySerializationEncryption):
     def __init__(self, password: bytes):
-        if not isinstance(password, bytes) or len(password) == 0:
+        if not isinstance(password, bytes) or not password:
             raise ValueError("Password must be 1 or more bytes.")
 
         self.password = password

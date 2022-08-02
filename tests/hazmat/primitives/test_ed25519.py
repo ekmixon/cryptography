@@ -29,8 +29,8 @@ def load_ed25519_vectors(vector_data):
     data = []
     for line in vector_data:
         secret_key, public_key, message, signature, _ = line.split(":")
-        secret_key = secret_key[0:64]
-        signature = signature[0:128]
+        secret_key = secret_key[:64]
+        signature = signature[:128]
         data.append(
             {
                 "secret_key": secret_key,

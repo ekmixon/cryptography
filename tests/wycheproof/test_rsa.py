@@ -71,9 +71,7 @@ def test_rsa_pkcs1v15_signature(backend, wycheproof):
     digest = _DIGESTS[wycheproof.testgroup["sha"]]
 
     if digest is None or not backend.hash_supported(digest):
-        pytest.skip(
-            "Hash {} not supported".format(wycheproof.testgroup["sha"])
-        )
+        pytest.skip(f'Hash {wycheproof.testgroup["sha"]} not supported')
 
     if should_verify(backend, wycheproof):
         key.verify(
@@ -102,13 +100,13 @@ def test_rsa_pkcs1v15_signature_generation(backend, wycheproof):
     assert isinstance(key, rsa.RSAPrivateKey)
     digest = _DIGESTS[wycheproof.testgroup["sha"]]
     assert digest is not None
-    if backend._fips_enabled:
-        if key.key_size < 2048 or isinstance(digest, hashes.SHA1):
-            pytest.skip(
-                "Invalid params for FIPS. key: {} bits, digest: {}".format(
-                    key.key_size, digest.name
-                )
-            )
+    if backend._fips_enabled and (
+        key.key_size < 2048 or isinstance(digest, hashes.SHA1)
+    ):
+        pytest.skip(
+            f"Invalid params for FIPS. key: {key.key_size} bits, digest: {digest.name}"
+        )
+
 
     sig = key.sign(
         binascii.unhexlify(wycheproof.testcase["msg"]),
@@ -139,11 +137,9 @@ def test_rsa_pss_signature(backend, wycheproof):
 
     if digest is None or mgf_digest is None:
         pytest.skip(
-            "PSS with digest={} and MGF digest={} not supported".format(
-                wycheproof.testgroup["sha"],
-                wycheproof.testgroup["mgfSha"],
-            )
+            f'PSS with digest={wycheproof.testgroup["sha"]} and MGF digest={wycheproof.testgroup["mgfSha"]} not supported'
         )
+
 
     if wycheproof.valid or wycheproof.acceptable:
         key.verify(

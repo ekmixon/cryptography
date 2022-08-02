@@ -34,11 +34,10 @@ class _HMACContext(hashes.HashContext):
             evp_md = self._backend._evp_md_from_algorithm(algorithm)
             if evp_md == self._backend._ffi.NULL:
                 raise UnsupportedAlgorithm(
-                    "{} is not a supported hash on this backend".format(
-                        algorithm.name
-                    ),
+                    f"{algorithm.name} is not a supported hash on this backend",
                     _Reasons.UNSUPPORTED_HASH,
                 )
+
             key_ptr = self._backend._ffi.from_buffer(key)
             res = self._backend._lib.HMAC_Init_ex(
                 ctx, key_ptr, len(key), evp_md, self._backend._ffi.NULL

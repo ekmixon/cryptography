@@ -66,14 +66,13 @@ def test_ecdsa_signature(backend, wycheproof):
         # instead of  Unsupported Algorithm. We can remove handling for that
         # exception when we drop support.
         pytest.skip(
-            "unable to load key (curve {})".format(
-                wycheproof.testgroup["key"]["curve"]
-            )
+            f'unable to load key (curve {wycheproof.testgroup["key"]["curve"]})'
         )
+
     digest = _DIGESTS[wycheproof.testgroup["sha"]]
 
     if not backend.hash_supported(digest):
-        pytest.skip("Hash {} not supported".format(digest))
+        pytest.skip(f"Hash {digest} not supported")
 
     if wycheproof.valid or (
         wycheproof.acceptable and not wycheproof.has_flag("MissingZero")

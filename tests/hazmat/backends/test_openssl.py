@@ -112,7 +112,7 @@ class TestOpenSSL:
             backend.openssl_assert(False)
 
     def test_consume_errors(self):
-        for i in range(10):
+        for _ in range(10):
             backend._lib.ERR_put_error(
                 backend._lib.ERR_LIB_EVP, 0, 0, b"test_openssl.py", -1
             )
@@ -287,7 +287,7 @@ class TestOpenSSLRandomEngine:
             assert name in ["getrandom", "/dev/urandom"]
         if sys.platform == "darwin":
             assert name in ["getentropy", "/dev/urandom"]
-        if sys.platform == "win32":
+        elif sys.platform == "win32":
             assert name == "CryptGenRandom"
 
     def test_activate_osrandom_already_default(self):

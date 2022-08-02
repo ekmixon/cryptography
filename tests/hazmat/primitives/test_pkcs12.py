@@ -37,11 +37,7 @@ from ...utils import load_vectors_from_file
 
 def _skip_curve_unsupported(backend, curve):
     if not backend.elliptic_curve_supported(curve):
-        pytest.skip(
-            "Curve {} is not supported by this backend {}".format(
-                curve.name, backend
-            )
-        )
+        pytest.skip(f"Curve {curve.name} is not supported by this backend {backend}")
 
 
 @pytest.mark.skip_fips(
@@ -610,8 +606,6 @@ class TestPKCS12Objects:
         c3n = PKCS12Certificate(cert3, None)
         c3a = PKCS12Certificate(cert3, b"a")
 
-        assert hash(c2n) == hash(c2n)
-        assert hash(c2a) == hash(c2a)
         assert hash(c2n) != hash(c2a)
         assert hash(c2n) != hash(c3n)
         assert hash(c2a) != hash(c2b)
@@ -742,9 +736,6 @@ class TestPKCS12Objects:
             [PKCS12Certificate(cert2, None), PKCS12Certificate(cert3, None)],
         )
         p12h = PKCS12KeyAndCertificates(None, None, [])
-
-        assert hash(p12a) == hash(p12a)
-        assert hash(p12h) == hash(p12h)
 
         assert hash(p12a) != hash(p12b)
         assert hash(p12a) != hash(p12c)

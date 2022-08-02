@@ -49,12 +49,13 @@ class PKCS12Certificate:
         return self._cert
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, PKCS12Certificate):
-            return NotImplemented
-
         return (
-            self.certificate == other.certificate
-            and self.friendly_name == other.friendly_name
+            (
+                self.certificate == other.certificate
+                and self.friendly_name == other.friendly_name
+            )
+            if isinstance(other, PKCS12Certificate)
+            else NotImplemented
         )
 
     def __hash__(self) -> int:
@@ -114,13 +115,14 @@ class PKCS12KeyAndCertificates:
         return self._additional_certs
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, PKCS12KeyAndCertificates):
-            return NotImplemented
-
         return (
-            self.key == other.key
-            and self.cert == other.cert
-            and self.additional_certs == other.additional_certs
+            (
+                self.key == other.key
+                and self.cert == other.cert
+                and self.additional_certs == other.additional_certs
+            )
+            if isinstance(other, PKCS12KeyAndCertificates)
+            else NotImplemented
         )
 
     def __hash__(self) -> int:

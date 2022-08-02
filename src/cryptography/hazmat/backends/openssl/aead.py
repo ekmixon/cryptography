@@ -33,12 +33,12 @@ def _aead_cipher_name(cipher: "_AEAD_TYPES") -> bytes:
     if isinstance(cipher, ChaCha20Poly1305):
         return b"chacha20-poly1305"
     elif isinstance(cipher, AESCCM):
-        return "aes-{}-ccm".format(len(cipher._key) * 8).encode("ascii")
+        return f"aes-{len(cipher._key) * 8}-ccm".encode("ascii")
     elif isinstance(cipher, AESOCB3):
-        return "aes-{}-ocb".format(len(cipher._key) * 8).encode("ascii")
+        return f"aes-{len(cipher._key) * 8}-ocb".encode("ascii")
     else:
         assert isinstance(cipher, AESGCM)
-        return "aes-{}-gcm".format(len(cipher._key) * 8).encode("ascii")
+        return f"aes-{len(cipher._key) * 8}-gcm".encode("ascii")
 
 
 def _aead_setup(

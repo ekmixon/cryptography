@@ -27,7 +27,7 @@ KeyedHashVector = collections.namedtuple(
 def check_backend_support(backend, item):
     for mark in item.node.iter_markers("supported"):
         if not mark.kwargs["only_if"](backend):
-            pytest.skip("{} ({})".format(mark.kwargs["skip_message"], backend))
+            pytest.skip(f'{mark.kwargs["skip_message"]} ({backend})')
 
 
 @contextmanager
@@ -109,7 +109,7 @@ def load_cryptrec_vectors(vector_data):
                 {"key": key, "plaintext": pt, "ciphertext": ct}
             )
         else:
-            raise ValueError("Invalid line in file '{}'".format(line))
+            raise ValueError(f"Invalid line in file '{line}'")
     return cryptrec_list
 
 
@@ -141,12 +141,10 @@ def load_hash_vectors(vector_data):
             if key is not None:
                 vectors.append(KeyedHashVector(msg, md, key))
                 key = None
-                msg = None
-                md = None
             else:
                 vectors.append(HashVector(msg, md))
-                msg = None
-                md = None
+            md = None
+            msg = None
         else:
             raise ValueError("Unknown line in hash vector")
     return vectors
@@ -276,9 +274,8 @@ def load_pkcs1_vectors(vector_data):
             attr = "iqmp"
         elif line.startswith("#"):
             attr = None
-        else:
-            if key is not None and attr is not None:
-                key[attr].append(line.strip())
+        elif key is not None and attr is not None:
+            key[attr].append(line.strip())
     return vectors
 
 
@@ -326,14 +323,12 @@ def load_rsa_nist_vectors(vector_data):
                 if salt_length is not None:
                     test_data["salt_length"] = salt_length
             data.append(test_data)
-        elif name == "e" and p is not None:
+        elif name == "e":
             test_data["public_exponent"] = int(value, 16)
         elif name == "d":
             test_data["private_exponent"] = int(value, 16)
         elif name == "Result":
             test_data["fail"] = value.startswith("F")
-        # For all other tokens we simply want the name, value stored in
-        # the dictionary
         else:
             test_data[name.lower()] = value.encode("ascii")
 
@@ -391,9 +386,8 @@ def load_fips_dsa_sig_vectors(vector_data):
         if not line or line.startswith("#"):
             continue
 
-        sha_match = FIPS_SHA_REGEX.match(line)
-        if sha_match:
-            digest_algorithm = "SHA-{}".format(sha_match.group("sha"))
+        if sha_match := FIPS_SHA_REGEX.match(line):
+            digest_algorithm = f'SHA-{sha_match.group("sha")}'
 
         if line.startswith("[mod"):
             continue
@@ -411,7 +405,7 @@ def load_fips_dsa_sig_vectors(vector_data):
         elif name == "Msg" and "msg" not in vectors[-1]:
             hexmsg = value.strip().encode("ascii")
             vectors[-1]["msg"] = binascii.unhexlify(hexmsg)
-        elif name == "Msg" and "msg" in vectors[-1]:
+        elif name == "Msg":
             hexmsg = value.strip().encode("ascii")
             vectors.append(
                 {
@@ -505,10 +499,9 @@ def load_fips_ecdsa_signing_vectors(vector_data):
     for line in vector_data:
         line = line.strip()
 
-        curve_match = CURVE_REGEX.match(line)
-        if curve_match:
+        if curve_match := CURVE_REGEX.match(line):
             curve_name = _ECDSA_CURVE_NAMES[curve_match.group("curve")]
-            digest_name = "SHA-{}".format(curve_match.group("sha"))
+            digest_name = f'SHA-{curve_match.group("sha")}'
 
         elif line.startswith("Msg = "):
             if data is not None:
@@ -581,7 +574,7 @@ def load_kasvs_dh_vectors(vector_data):
             assert match is not None
 
             if match.group(1) == "F":
-                if int(match.group(2)) in (5, 10):
+                if int(match.group(2)) in {5, 10}:
                     data["fail_z"] = True
                 else:
                     data["fail_agree"] = True
@@ -624,8 +617,7 @@ def load_kasvs_ecdh_vectors(vector_data):
             parm = line.split("Parameter set(s) supported:")
             if len(parm) == 2:
                 names = parm[1].strip().split()
-                for n in names:
-                    tags.append("[%s]" % n)
+                tags.extend(f"[{n}]" for n in names)
                 break
 
     # Sets Metadata
@@ -688,10 +680,7 @@ def load_kasvs_ecdh_vectors(vector_data):
             match = KASVS_RESULT_REGEX.match(result_str)
             assert match is not None
 
-            if match.group(1) == "F":
-                data["fail"] = True
-            else:
-                data["fail"] = False
+            data["fail"] = match.group(1) == "F"
             data["errno"] = int(match.group(2))
 
             data["curve"] = sets[tag]
@@ -776,13 +765,12 @@ def load_nist_kbkdf_vectors(vector_data):
             name, value = [c.strip() for c in tag_data.split("=")]
             if value.endswith("_BITS"):
                 value = int(value.split("_")[0])
-                tag.update({name.lower(): value})
+                tag[name.lower()] = value
                 continue
 
-            tag.update({name.lower(): value.lower()})
+            tag[name.lower()] = value.lower()
         elif line.startswith("COUNT="):
-            test_data = {}
-            test_data.update(tag)
+            test_data = {} | tag
             vectors.append(test_data)
         elif line.startswith("L"):
             name, value = [c.strip() for c in line.split("=")]
@@ -799,9 +787,9 @@ def load_ed25519_vectors(vector_data):
     for line in vector_data:
         secret_key, public_key, message, signature, _ = line.split(":")
         # In the vectors the first element is secret key + public key
-        secret_key = secret_key[0:64]
+        secret_key = secret_key[:64]
         # In the vectors the signature section is signature + message
-        signature = signature[0:128]
+        signature = signature[:128]
         data.append(
             {
                 "secret_key": secret_key,

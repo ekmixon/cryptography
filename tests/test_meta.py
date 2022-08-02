@@ -15,8 +15,7 @@ def find_all_modules() -> typing.List[str]:
     return sorted(
         mod
         for _, mod, _ in pkgutil.walk_packages(
-            cryptography.__path__,
-            prefix=cryptography.__name__ + ".",
+            cryptography.__path__, prefix=f"{cryptography.__name__}."
         )
     )
 

@@ -90,7 +90,7 @@ def aes_key_wrap_with_padding(
     )
     # pad the key to wrap if necessary
     pad = (8 - (len(key_to_wrap) % 8)) % 8
-    key_to_wrap = key_to_wrap + b"\x00" * pad
+    key_to_wrap += b"\x00" * pad
     if len(key_to_wrap) == 8:
         # RFC 5649 - 4.1 - exactly 8 octets after padding
         encryptor = Cipher(AES(wrapping_key), ECB()).encryptor()
@@ -142,10 +142,7 @@ def aes_key_unwrap_with_padding(
     ):
         raise InvalidUnwrap()
 
-    if b == 0:
-        return data
-    else:
-        return data[:-b]
+    return data if b == 0 else data[:-b]
 
 
 def aes_key_unwrap(

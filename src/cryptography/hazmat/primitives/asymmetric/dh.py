@@ -31,20 +31,17 @@ class DHParameterNumbers:
             raise ValueError("DH generator must be 2 or greater")
 
         if p.bit_length() < _MIN_MODULUS_SIZE:
-            raise ValueError(
-                "p (modulus) must be at least {}-bit".format(_MIN_MODULUS_SIZE)
-            )
+            raise ValueError(f"p (modulus) must be at least {_MIN_MODULUS_SIZE}-bit")
 
         self._p = p
         self._g = g
         self._q = q
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, DHParameterNumbers):
-            return NotImplemented
-
         return (
-            self._p == other._p and self._g == other._g and self._q == other._q
+            (self._p == other._p and self._g == other._g and self._q == other._q)
+            if isinstance(other, DHParameterNumbers)
+            else NotImplemented
         )
 
     def parameters(self, backend: typing.Any = None) -> "DHParameters":
@@ -81,12 +78,13 @@ class DHPublicNumbers:
         self._parameter_numbers = parameter_numbers
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, DHPublicNumbers):
-            return NotImplemented
-
         return (
-            self._y == other._y
-            and self._parameter_numbers == other._parameter_numbers
+            (
+                self._y == other._y
+                and self._parameter_numbers == other._parameter_numbers
+            )
+            if isinstance(other, DHPublicNumbers)
+            else NotImplemented
         )
 
     def public_key(self, backend: typing.Any = None) -> "DHPublicKey":
@@ -119,12 +117,10 @@ class DHPrivateNumbers:
         self._public_numbers = public_numbers
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, DHPrivateNumbers):
-            return NotImplemented
-
         return (
-            self._x == other._x
-            and self._public_numbers == other._public_numbers
+            (self._x == other._x and self._public_numbers == other._public_numbers)
+            if isinstance(other, DHPrivateNumbers)
+            else NotImplemented
         )
 
     def private_key(self, backend: typing.Any = None) -> "DHPrivateKey":
